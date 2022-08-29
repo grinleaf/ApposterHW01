@@ -116,37 +116,37 @@ class MainActivity : AppCompatActivity() {
 
 private const val STARTING_PAGE_INDEX = 1
 
-class MyPagingSource(
-    val watchService: WatchService,
-    val skip : Int,
-    val limit : Int,
-    val withoutFree : Boolean
-): PagingSource<Int, String>() {
-
-    override fun getRefreshKey(state: PagingState<Int, String>): Int? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, String> {
-        return try {
-            val position = params.key?: STARTING_PAGE_INDEX
-            val watchList = watchService.getWatchList(skip,limit,withoutFree).map {
-                it.body()?.watchSells?.map { it.watch.images } ?: emptyList()
-            }
-
-            LoadResult.Page(
-                data = watchList,   //요기
-                prevKey = if(position == STARTING_PAGE_INDEX) null else position-1,
-                nextKey = null
-            )
-        } catch (exception: IOException){
-            LoadResult.Error(exception)
-        } catch (exception: HttpException){
-            LoadResult.Error(exception)
-        }
-
-    }
-}
+//class MyPagingSource(
+//    val watchService: WatchService,
+//    val skip : Int,
+//    val limit : Int,
+//    val withoutFree : Boolean
+//): PagingSource<Int, String>() {
+//
+//    override fun getRefreshKey(state: PagingState<Int, String>): Int? {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, String> {
+//        return try {
+//            val position = params.key?: STARTING_PAGE_INDEX
+//            val watchList = watchService.getWatchList(skip,limit,withoutFree).map {
+//                it.body()?.watchSells?.map { it.watch.images } ?: emptyList()
+//            }
+//
+//            LoadResult.Page(
+//                data = watchList,   //요기
+//                prevKey = if(position == STARTING_PAGE_INDEX) null else position-1,
+//                nextKey = null
+//            )
+//        } catch (exception: IOException){
+//            LoadResult.Error(exception)
+//        } catch (exception: HttpException){
+//            LoadResult.Error(exception)
+//        }
+//
+//    }
+//}
 
 /* 1. RecyclerView Adapter */
 
