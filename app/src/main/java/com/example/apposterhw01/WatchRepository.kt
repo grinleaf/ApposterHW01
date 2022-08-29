@@ -36,7 +36,7 @@ class WatchRepository {
 //            .observeOn(AndroidSchedulers.mainThread())
 //    }
 
-    fun getWatchPreview(): Flow<PagingData<String>> {
+    fun getWatchPreview(): Flow<PagingData<Preview>> {
         return Pager(
             config = PagingConfig(
                 pageSize = 30,

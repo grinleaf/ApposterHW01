@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             watchListViewModel.watchRepository.getWatchPreview().collectLatest { pagingData ->
-                adapter.submitData(pagingData)
+                adapter.submitData(pagingData.map { it.preview })
             }
 
 //            watchListViewModel.run {
@@ -116,37 +116,40 @@ class MainActivity : AppCompatActivity() {
 
 private const val STARTING_PAGE_INDEX = 1
 
-//class MyPagingSource(
-//    val watchService: WatchService,
-//    val skip : Int,
-//    val limit : Int,
-//    val withoutFree : Boolean
-//): PagingSource<Int, String>() {
-//
-//    override fun getRefreshKey(state: PagingState<Int, String>): Int? {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, String> {
-//        return try {
-//            val position = params.key?: STARTING_PAGE_INDEX
-//            val watchList = watchService.getWatchList(skip,limit,withoutFree).map {
-//                it.body()?.watchSells?.map { it.watch.images } ?: emptyList()
-//            }
-//
-//            LoadResult.Page(
-//                data = watchList,   //요기
-//                prevKey = if(position == STARTING_PAGE_INDEX) null else position-1,
-//                nextKey = null
-//            )
-//        } catch (exception: IOException){
-//            LoadResult.Error(exception)
-//        } catch (exception: HttpException){
-//            LoadResult.Error(exception)
-//        }
-//
-//    }
-//}
+class MyPagingSource(
+    val watchService: WatchService,
+    val skip : Int,
+    val limit : Int,
+    val withoutFree : Boolean
+): PagingSource<Int, Preview>() {
+
+    override fun getRefreshKey(state: PagingState<Int, Preview>): Int? {
+        return state.anchorPosition?.let { anchorPosition ->
+            val anchorPage = state.closestPageToPosition(anchorPosition)
+            anchorPage?.prevKey?.plus(STARTING_PAGE_INDEX) ?: anchorPage?.nextKey?.minus(STARTING_PAGE_INDEX)
+        }
+    }
+
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Preview> {
+        return try {
+            val position = params.key?: STARTING_PAGE_INDEX
+            val watchList = watchService.getWatchList(skip,limit,withoutFree).map {
+                it.body()?.watchSells?.map { it.watch.images } ?: emptyList()
+            }
+
+            LoadResult.Page(
+                data = watchList.blockingGet(),   //요기
+                prevKey = if(position == STARTING_PAGE_INDEX) null else position-1,
+                nextKey = null
+            )
+        } catch (exception: IOException){
+            LoadResult.Error(exception)
+        } catch (exception: HttpException){
+            LoadResult.Error(exception)
+        }
+
+    }
+}
 
 /* 1. RecyclerView Adapter */
 
@@ -205,8 +208,7 @@ class PagingAdapter(val requestManager: RequestManager, val previewImage: Mutabl
     }
 
     override fun onBindViewHolder(holder: WatchViewHolder, position: Int) {
-        val previewImage = previewImage[position]
-        requestManager.load(previewImage).into(holder.iv)
+        requestManager.load(getItem(position)).into(holder.iv)
     }
 
     companion object {
