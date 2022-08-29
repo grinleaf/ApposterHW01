@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerview.adapter = PagingAdapter(Glide.with(this), previewImages)
 
         lifecycleScope.launch {
-            watchListViewModel.watchRepository.getWatchPreview().collectLatest { pagingData ->
+            watchListViewModel.getPreview().collectLatest { pagingData ->
                 adapter.submitData(pagingData.map { it.preview })
             }
 

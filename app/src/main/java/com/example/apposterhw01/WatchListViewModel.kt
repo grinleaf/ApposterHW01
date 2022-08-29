@@ -3,12 +3,8 @@ package com.example.apposterhw01
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import androidx.paging.rxjava2.cachedIn
-import androidx.paging.rxjava2.flowable
-import androidx.paging.rxjava2.observable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import java.util.concurrent.Flow
@@ -19,9 +15,9 @@ class WatchListViewModel:ViewModel() {
     val watchListLiveData = MutableLiveData<List<String>>()
     val watchRepository= WatchRepository()
 
-    fun getPreview() {
-        watchRepository.getWatchPreview().cachedIn(CoroutineScope(Dispatchers.IO))
-    //        watchRepository.
+    fun getPreview() : kotlinx.coroutines.flow.Flow<PagingData<Preview>> {
+        return watchRepository.getWatchPreview().cachedIn(CoroutineScope(Dispatchers.IO))
+        //        watchRepository.
 //        run {
 //            requestWatchPreview()
 //            .subscribe({
