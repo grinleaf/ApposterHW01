@@ -40,8 +40,8 @@ class WatchRepository {
         return Pager(
             config = PagingConfig(
                 pageSize = 30,
-//                maxSize = 100,
-//                enablePlaceholders = false
+                maxSize = 100,
+                enablePlaceholders = false
             ),
             pagingSourceFactory = { MyPagingSource(retrofit, skip, limit, withoutFree)}
         ).flow
