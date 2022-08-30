@@ -8,9 +8,9 @@ import retrofit2.http.Query
 interface WatchService {
 
     @GET("/api/watch-sells/popular/weekly")
-    fun getWatchList(
+    suspend fun getWatchList(
         @Query("skip") skip:Int,
         @Query("limit") limit:Int,
         @Query("withoutFree") withoutFree:Boolean
-    ) : Single<Response<WatchResponse>>
+    ) : WatchResponse
 }

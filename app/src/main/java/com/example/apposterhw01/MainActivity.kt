@@ -2,6 +2,7 @@ package com.example.apposterhw01
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,11 +20,9 @@ import com.bumptech.glide.RequestManager
 import com.example.apposterhw01.databinding.ActivityMainBinding
 import io.reactivex.Single
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
-import java.lang.reflect.TypeVariable
 
 
 class MainActivity : AppCompatActivity() {
@@ -56,12 +55,14 @@ class MainActivity : AppCompatActivity() {
 //        binding.recyclerview.adapter= adapter
 
         // 3. 페이징 3 어댑터
-        adapter= PagingAdapter(Glide.with(this), previewImages)
-        binding.recyclerview.adapter = PagingAdapter(Glide.with(this), previewImages)
+        adapter= PagingAdapter(Glide.with(this))
+        binding.recyclerview.adapter = PagingAdapter(Glide.with(this))
 
         lifecycleScope.launch {
             watchListViewModel.getPreview().collectLatest { pagingData ->
-                adapter.submitData(pagingData.map { it.preview })
+                Log.d("!!!!!", "submitData start")
+                adapter.submitData(pagingData)
+                Log.d("!!!!!", "submitData end")
             }
 
 //            watchListViewModel.run {
@@ -132,13 +133,15 @@ class MyPagingSource(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Preview> {
         return try {
+            Log.d("!!!!!", "load start key : ${params.key}")
+
             val position = params.key?: STARTING_PAGE_INDEX
-            val watchList = watchService.getWatchList(skip,limit,withoutFree).map {
-                it.body()?.watchSells?.map { it.watch.images } ?: emptyList()
-            }
+            val watchList = watchService.getWatchList(skip,limit,withoutFree).watchSells.map { it.watch.images }
+
+            Log.d("!!!!!", "load start list : $watchList")
 
             LoadResult.Page(
-                data = watchList.blockingGet(),   //요기
+                data = watchList,   //요기
                 prevKey = if(position == STARTING_PAGE_INDEX) null else position-1,
                 nextKey = null
             )
@@ -198,7 +201,7 @@ class MyPagingSource(
 
 /* 3. paging3 adapter */
 
-class PagingAdapter(val requestManager: RequestManager, val previewImage: MutableList<String>) : PagingDataAdapter<String, PagingAdapter.WatchViewHolder>(diffUtil) {
+class PagingAdapter(val requestManager: RequestManager) : PagingDataAdapter<Preview, PagingAdapter.WatchViewHolder>(diffUtil) {
     class WatchViewHolder(view: View): RecyclerView.ViewHolder(view){
         val iv:ImageView by lazy { view.findViewById(R.id.iv_list_item) }
     }
@@ -208,13 +211,17 @@ class PagingAdapter(val requestManager: RequestManager, val previewImage: Mutabl
     }
 
     override fun onBindViewHolder(holder: WatchViewHolder, position: Int) {
-        requestManager.load(getItem(position)).into(holder.iv)
+        val imgUrl = "http://mtm-api.apposter.com:7777"+getItem(position)?.preview
+
+        Log.d("!!!!!", "url : $imgUrl")
+
+        requestManager.load(imgUrl).into(holder.iv)
     }
 
     companion object {
-        val diffUtil = object : DiffUtil.ItemCallback<String>() {
-            override fun areItemsTheSame(oldItem: String, newItem: String) = oldItem == newItem
-            override fun areContentsTheSame(oldItem: String, newItem: String) = oldItem == newItem
+        val diffUtil = object : DiffUtil.ItemCallback<Preview>() {
+            override fun areItemsTheSame(oldItem: Preview, newItem: Preview) = oldItem == newItem
+            override fun areContentsTheSame(oldItem: Preview, newItem: Preview) = oldItem == newItem
         }
     }
 }
