@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/bg_list_item"
-    android:layout_margin="8dp">
+    android:layout_margin="4dp"
+    android:padding="8dp">
 
     <ImageView
         android:id="@+id/iv_list_item"

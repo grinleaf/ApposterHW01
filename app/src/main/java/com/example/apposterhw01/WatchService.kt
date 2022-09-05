@@ -13,4 +13,11 @@ interface WatchService {
         @Query("limit") limit:Int,
         @Query("withoutFree") withoutFree:Boolean
     ) : WatchResponse
+
+    @GET("api/watch-sells")
+    suspend fun  getNewWatchList(
+        @Query("limit") limit:Int,
+        @Query("page") page:Int,
+        @Query("includeEvent") includeEvent:Boolean
+    ) : WatchResponse
 }

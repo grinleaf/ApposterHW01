@@ -58,6 +58,7 @@ dependencies {
 
     //paging3 adapter + RxJava
     implementation 'androidx.paging:paging-rxjava2-ktx:3.1.1'
+//    implementation 'androidx.paging:paging-rxjava3-ktx:3.1.1'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
